@@ -1,0 +1,80 @@
+services:
+  - type: web
+    name: gashapon-bot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: gashapon-db
+          property: connectionString
+      - key: LINE_CHANNEL_ACCESS_TOKEN
+        sync: false
+      - key: LINE_CHANNEL_SECRET
+        sync: false
+      - key: CRON_SECRET
+        generateValue: true
+
+databases:
+  - name: gashapon-db
+    databaseName: gashapon
+    user: gashapon_user
+    plan: free
+
+# Note: Render Free Tier Cron Jobs are configured in the dashboard or via this blueprint if paid.
+# For free tier, we can use a separate cron service or just rely on external triggers.
+# However, Render Blueprints support cron jobs.
+# Let's define it here, but user might need to adjust plan.
+# Actually, Render's "Cron Job" service type is what we want.
+
+jobs:
+  - name: gashapon-crawl-morning
+    type: cron
+    schedule: "0 22 * * *" # 07:00 JST = 22:00 UTC (previous day)
+    command: curl -X POST -H "Authorization: Bearer $CRON_SECRET" $RENDER_EXTERNAL_URL/cron/crawl
+    envVars:
+      - key: CRON_SECRET
+        fromService:
+          type: web
+          name: gashapon-bot
+          envVarKey: CRON_SECRET
+      - key: RENDER_EXTERNAL_URL
+        fromService:
+          type: web
+          name: gashapon-bot
+          property: url
+
+  - name: gashapon-crawl-noon
+    type: cron
+    schedule: "0 3 * * *" # 12:00 JST = 03:00 UTC
+    command: curl -X POST -H "Authorization: Bearer $CRON_SECRET" $RENDER_EXTERNAL_URL/cron/crawl
+    envVars:
+      - key: CRON_SECRET
+        fromService:
+          type: web
+          name: gashapon-bot
+          envVarKey: CRON_SECRET
+      - key: RENDER_EXTERNAL_URL
+        fromService:
+          type: web
+          name: gashapon-bot
+          property: url
+
+  - name: gashapon-crawl-evening
+    type: cron
+    schedule: "0 9 * * *" # 18:00 JST = 09:00 UTC
+    command: curl -X POST -H "Authorization: Bearer $CRON_SECRET" $RENDER_EXTERNAL_URL/cron/crawl
+    envVars:
+      - key: CRON_SECRET
+        fromService:
+          type: web
+          name: gashapon-bot
+          envVarKey: CRON_SECRET
+      - key: RENDER_EXTERNAL_URL
+        fromService:
+          type: web
+          name: gashapon-bot
+          property: url
