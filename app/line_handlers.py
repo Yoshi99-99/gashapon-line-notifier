@@ -106,11 +106,13 @@ async def handle_register(event, text, user, db):
         return
 
     # Extract product code
-    # URL example: https://gashapon.jp/shop/gplus_list.php?product_code=XXXXXX
-    match = re.search(r"product_code=([a-zA-Z0-9]+)", url)
+    # URL example: 
+    # https://gashapon.jp/shop/gplus_list.php?product_code=XXXXXX
+    # https://gashapon.jp/products/detail.php?jan_code=XXXXXX
+    match = re.search(r"(?:product_code|jan_code)=([a-zA-Z0-9]+)", url)
     if not match:
         if line_bot_api:
-            line_bot_api.reply_message(event.reply_token, TextSendMessage(text="URLから商品コードを抽出できませんでした。"))
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(text="URLから商品コード(product_code または jan_code)を抽出できませんでした。"))
         return
     
     product_code = match.group(1)
