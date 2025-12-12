@@ -78,8 +78,6 @@ async def handle_message(event: MessageEvent, db: Session):
         await handle_delete(event, text, user, db)
     else:
         # Echo or help message
-    else:
-        # Echo or help message
         reply_text = (
             "【使い方ガイド】\n\n"
             "🤖 監視を登録する\n"
