@@ -78,7 +78,19 @@ async def handle_message(event: MessageEvent, db: Session):
         await handle_delete(event, text, user, db)
     else:
         # Echo or help message
-        reply_text = "コマンド:\n・登録 {都道府県} {商品URL}\n・一覧\n・削除 {監視ID}"
+    else:
+        # Echo or help message
+        reply_text = (
+            "【使い方ガイド】\n\n"
+            "🤖 監視を登録する\n"
+            "「登録 {都道府県} {商品URL}」\n"
+            "例：登録 東京 https://gashapon.jp/products/detail.php?jan_code=...\n\n"
+            "📋 登録リストを見る\n"
+            "「一覧」\n\n"
+            "🗑️ 登録を削除する\n"
+            "「削除 {監視ID}」\n"
+            "※IDは一覧コマンドで確認できます。"
+        )
         if line_bot_api:
             line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply_text))
 
